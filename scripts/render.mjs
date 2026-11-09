@@ -1,6 +1,7 @@
-// Renders the profile SVGs in assets/: the hero, whose tagline replays at my Monkeytype best, and the stack row.
+// Renders the profile SVGs in assets/ (the hero, whose tagline replays at my Monkeytype best, and the stack icons)
+// and writes the stack row into README.md.
 // Usage: node scripts/render.mjs   (Node 18+, no dependencies)
-import { writeFileSync } from "node:fs";
+import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 
 const USER = "Kyziq";
 const NAME = "Haziq";
@@ -34,16 +35,16 @@ const esc = (s) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;");
 
 const SIMPLE_ICONS = "16.37.0"; // pinned, so an icon redesign upstream can't change the row unannounced
 const STACK = {
-  typescript: "TypeScript",
-  python: "Python",
-  react: "React",
-  tanstack: "TanStack",
-  hono: "Hono",
-  fastapi: "FastAPI",
-  postgresql: "PostgreSQL",
-  docker: "Docker",
-  kubernetes: "Kubernetes",
-  ansible: "Ansible",
+  typescript: ["TypeScript", "https://www.typescriptlang.org"],
+  python: ["Python", "https://www.python.org"],
+  react: ["React", "https://react.dev"],
+  tanstack: ["TanStack", "https://tanstack.com"],
+  hono: ["Hono", "https://hono.dev"],
+  fastapi: ["FastAPI", "https://fastapi.tiangolo.com"],
+  postgresql: ["PostgreSQL", "https://www.postgresql.org"],
+  docker: ["Docker", "https://www.docker.com"],
+  kubernetes: ["Kubernetes", "https://kubernetes.io"],
+  ansible: ["Ansible", "https://www.ansible.com"],
 };
 const icons = await Promise.all(
   Object.keys(STACK).map(async (slug) => {
@@ -55,20 +56,15 @@ const icons = await Promise.all(
   }),
 );
 
-function stackSvg(t) {
-  const size = 22;
-  const gap = (W - size * icons.length) / (icons.length - 1); // same width as the hero, so the two line up
-  const paths = icons
-    .map((d, i) => `<path transform="translate(${(i * (size + gap)).toFixed(1)} 0) scale(${size / 24})" d="${d}"/>`)
-    .join("\n");
-  return `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${size}" viewBox="0 0 ${W} ${size}" role="img" aria-labelledby="t">
-<title id="t">${Object.values(STACK).join(", ")}</title>
-<g fill="${t.muted}">
-${paths}
-</g>
-</svg>
-`;
-}
+// One file per icon and theme, so each can carry its own link and hover name in the README.
+const iconSvg = (d, name, t) =>
+  `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" role="img"><title>${name}</title><path fill="${t.muted}" d="${d}"/></svg>\n`;
+const stackBlock = Object.entries(STACK)
+  .map(
+    ([slug, [name, url]]) =>
+      `<a href="${url}" title="${name}"><picture><source media="(prefers-color-scheme: dark)" srcset="assets/stack/${slug}-dark.svg"><img src="assets/stack/${slug}-light.svg" alt="${name}" title="${name}" width="26" height="26"></picture></a>`,
+  )
+  .join("&nbsp;&nbsp;&nbsp;");
 
 // Greedy word wrap; the space that ends a row is typed but not drawn.
 const rows = [""];
@@ -125,8 +121,17 @@ ${text}
 `;
 }
 
+mkdirSync(new URL("../assets/stack/", import.meta.url), { recursive: true });
 for (const [mode, t] of Object.entries(themes)) {
   writeFileSync(new URL(`../assets/hero-${mode}.svg`, import.meta.url), svg(t));
-  writeFileSync(new URL(`../assets/stack-${mode}.svg`, import.meta.url), stackSvg(t));
+  Object.keys(STACK).forEach((slug, i) =>
+    writeFileSync(new URL(`../assets/stack/${slug}-${mode}.svg`, import.meta.url), iconSvg(icons[i], STACK[slug][0], t)),
+  );
 }
+
+const readme = new URL("../README.md", import.meta.url);
+const text = readFileSync(readme, "utf8");
+const block = /<!-- stack:start -->[\s\S]*<!-- stack:end -->/;
+if (!block.test(text)) throw new Error("README is missing the stack markers");
+writeFileSync(readme, text.replace(block, `<!-- stack:start -->\n${stackBlock}\n<!-- stack:end -->`));
 console.log(`rendered at ${wpm} wpm, ${typingMs} ms of typing`);

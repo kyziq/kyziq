@@ -1,4 +1,4 @@
-name: Refresh hero
+name: Refresh profile
 
 on:
   schedule:
@@ -15,10 +15,13 @@ jobs:
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - run: node scripts/render.mjs
-      - name: Commit if the typing best changed
+      - run: node scripts/oss.mjs
+        env:
+          GH_TOKEN: ${{ github.token }}
+      - name: Commit if anything changed
         run: |
-          git diff --quiet assets && exit 0
+          git diff --quiet assets README.md && exit 0
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git commit -am "chore: refresh hero typing speed"
+          git commit -am "chore: refresh profile"
           git push

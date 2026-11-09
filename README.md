@@ -14,6 +14,8 @@ Lately I've been:
 - shipping AI-scored games and running them live at TM events
 - looking after the infrastructure under all of it, from Ansible to TLS
 
-Merged into [Zod](https://github.com/colinhacks/zod/pull/4204), [Better Auth](https://github.com/better-auth/better-auth/pull/10114), [TanStack Router](https://github.com/TanStack/router/pull/2377), [T3 Code](https://github.com/pingdotgg/t3code/pull/21055) and [HeroUI Native](https://github.com/heroui-inc/heroui-native/pull/102).
+<!-- oss:start -->
+Merged into [pingdotgg/t3code](https://github.com/pingdotgg/t3code/pull/21055), [colinhacks/zod](https://github.com/colinhacks/zod/pull/4204), [better-auth/better-auth](https://github.com/better-auth/better-auth/pull/10114), [TanStack/router](https://github.com/TanStack/router/pull/2377), [heroui-inc/heroui-native](https://github.com/heroui-inc/heroui-native/pulls?q=is%3Apr+author%3Akyziq+is%3Amerged), [haydenbleasel/ultracite](https://github.com/haydenbleasel/ultracite/pull/308), [nank1ro/flutter-shadcn-ui](https://github.com/nank1ro/flutter-shadcn-ui/pull/67), [TanStack/cli](https://github.com/TanStack/cli/pull/29), [sunarya-thito/shadcn_flutter](https://github.com/sunarya-thito/shadcn_flutter/pull/166), [aymericzip/intlayer](https://github.com/aymericzip/intlayer/pull/534) and [khrnchn/sedekah-je](https://github.com/khrnchn/sedekah-je/pulls?q=is%3Apr+author%3Akyziq+is%3Amerged).
+<!-- oss:end -->
 
 Mostly TypeScript and Python: React, TanStack, Hono, FastAPI, PostgreSQL, Kubernetes.

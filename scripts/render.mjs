@@ -1,4 +1,4 @@
-// Renders assets/hero-{dark,light}.svg: the tagline replays at my Monkeytype personal best.
+// Renders the profile SVGs in assets/: the hero, whose tagline replays at my Monkeytype best, and the stack row.
 // Usage: node scripts/render.mjs   (Node 18+, no dependencies)
 import { writeFileSync } from "node:fs";
 
@@ -31,6 +31,44 @@ const themes = {
 };
 
 const esc = (s) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;");
+
+const SIMPLE_ICONS = "16.37.0"; // pinned, so an icon redesign upstream can't change the row unannounced
+const STACK = {
+  typescript: "TypeScript",
+  python: "Python",
+  react: "React",
+  tanstack: "TanStack",
+  hono: "Hono",
+  fastapi: "FastAPI",
+  postgresql: "PostgreSQL",
+  docker: "Docker",
+  kubernetes: "Kubernetes",
+  ansible: "Ansible",
+};
+const icons = await Promise.all(
+  Object.keys(STACK).map(async (slug) => {
+    const r = await fetch(`https://cdn.jsdelivr.net/npm/simple-icons@${SIMPLE_ICONS}/icons/${slug}.svg`);
+    if (!r.ok) throw new Error(`simple-icons ${slug}: ${r.status}`);
+    const d = (await r.text()).match(/ d="([^"]+)"/)?.[1];
+    if (!d) throw new Error(`simple-icons ${slug}: no path`);
+    return d;
+  }),
+);
+
+function stackSvg(t) {
+  const size = 22;
+  const gap = (W - size * icons.length) / (icons.length - 1); // same width as the hero, so the two line up
+  const paths = icons
+    .map((d, i) => `<path transform="translate(${(i * (size + gap)).toFixed(1)} 0) scale(${size / 24})" d="${d}"/>`)
+    .join("\n");
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${size}" viewBox="0 0 ${W} ${size}" role="img" aria-labelledby="t">
+<title id="t">${Object.values(STACK).join(", ")}</title>
+<g fill="${t.muted}">
+${paths}
+</g>
+</svg>
+`;
+}
 
 // Greedy word wrap; the space that ends a row is typed but not drawn.
 const rows = [""];
@@ -89,5 +127,6 @@ ${text}
 
 for (const [mode, t] of Object.entries(themes)) {
   writeFileSync(new URL(`../assets/hero-${mode}.svg`, import.meta.url), svg(t));
+  writeFileSync(new URL(`../assets/stack-${mode}.svg`, import.meta.url), stackSvg(t));
 }
 console.log(`rendered at ${wpm} wpm, ${typingMs} ms of typing`);
